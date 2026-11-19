@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crecimiento: Medios de Pago, Zonas y Cartera Anual</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --background: #f8fafc;
+      --foreground: #0f172a;
+      --card: #ffffff;
+      --border: #cbd5e1;
+      --muted-foreground: #475569;
+    }
+    body {
+      background: var(--background);
+      color: var(--foreground);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+    .tbl-compact {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      line-height: 1.25;
+    }
+    .tbl-compact th, .tbl-compact td {
+      padding: 5px 7px;
+      border-bottom: 1px solid #e2e8f0;
+      white-space: nowrap;
+    }
+    .tbl-compact thead tr.grp-hdr th {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 4px 6px;
+      border-bottom: 1px solid #cbd5e1;
+    }
+    .tbl-compact thead tr.col-hdr th {
+      background: #f1f5f9;
+      color: #334155;
+      font-weight: 700;
+      cursor: pointer;
+      user-select: none;
+      border-bottom: 2px solid #94a3b8;
+    }
+    .tbl-compact thead tr.col-hdr th:hover {
+      background: #e2e8f0;
+    }
+    .tbl-compact tbody tr:hover {
+      background: #f8fafc;
+    }
+    .grp-sep {
+      border-right: 2px solid #cbd5e1 !important;
+    }
+    .total-row {
+      background: #dbeafe !important;
+      font-weight: 800;
+      border-top: 2px solid #2563eb;
+    }
+  </style>
+</head>
+<body class="min-h-screen p-2.5 md:p-4">
+  <div class="max-w-[1560px] mx-auto space-y-3">
+    <!-- HEADER -->
+    <header class="bg-white border border-slate-300 rounded-xl p-3.5 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <span class="px-2.5 py-1 rounded-full text-[10.5px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200 uppercase tracking-wider">
+          Comité de Planeación y Cartera
+        </span>
+        <div>
+          <h1 class="text-base md:text-lg font-extrabold text-slate-900">Crecimiento de Medios de Recaudo, Zonas y Cartera Anual</h1>
+          <p class="text-[11px] text-slate-500">Gráficas Interactivas | Ordenamiento Mayor a Menor / Menor a Mayor / A–Z en todas las vistas</p>
+        </div>
+      </div>
+
+      <nav class="flex flex-wrap gap-1.5">
+        <button onclick="switchSubTab('med')" id="btn-sub-med" class="sub-btn px-3 py-1.5 rounded-md text-xs font-bold bg-blue-600 text-white">
+          📱 1. Medios Electrónicos (13 Medios: $14.478,4M)
+        </button>
+        <button onclick="switchSubTab('reg')" id="btn-sub-reg" class="sub-btn px-3 py-1.5 rounded-md text-xs font-bold bg-slate-100 text-slate-700 border border-slate-300">
+          📍 2. Medios por Zona / Regional (17 Zonas)
+        </button>
+        <button onclick="switchSubTab('cartera_anual')" id="btn-sub-cartera_anual" class="sub-btn px-3 py-1.5 rounded-md text-xs font-bold bg-slate-100 text-slate-700 border border-slate-300">
+          📈 3. Crecimiento Anual Regional (2023–2025)
+        </button>
+        <button onclick="switchSubTab('tendencia_medios')" id="btn-sub-tendencia_medios" class="sub-btn px-3 py-1.5 rounded-md text-xs font-bold bg-slate-100 text-slate-700 border border-slate-300">
+          📉 4. Tendencia Anual Medios de Pago (2023–2026*)
+        </button>
+      </nav>
+    </header>
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <main class="bg-white border border-slate-300 rounded-xl p-3.5 shadow-sm space-y-3">
+      <!-- CONTROLES VISTA ESTÁNDAR (1 Y 2: MEDIOS Y ZONAS M01-M10) -->
+      <div id="std-controls" class="flex flex-wrap gap-2 items-center justify-between pb-2.5 border-b border-slate-200">
+        <div class="text-xs font-bold text-slate-700" id="std-title">Medios Electrónicos — Evolución Mensual M01 a M10</div>
+        <div class="flex flex-wrap gap-2 items-center">
+          <input id="t4-search" type="text" oninput="renderTab4()" placeholder="Buscar medio o regional..." class="px-2.5 py-1.5 text-xs rounded-md bg-white border border-slate-300" />
+          <select id="t4-view" onchange="renderTab4()" class="px-2.5 py-1.5 text-xs font-bold rounded-md bg-white border border-slate-300">
+            <option value="GROWTH" selected>📊 Resumen Crecimiento (M01 vs M10 + 10M)</option>
+            <option value="REC_M">💵 Recaudo Mensual (M01 a M10)</option>
+            <option value="PRES_M">🎯 Presupuesto Mensual (M01 a M10)</option>
+            <option value="CUMP_M">📈 % Cumplimiento Mensual (M01 a M10)</option>
+          </select>
+          <select id="t4-sort" onchange="renderTab4()" class="px-2.5 py-1.5 text-xs font-bold rounded-md bg-blue-50/50 border-2 border-blue-600">
+            <option value="rtot_desc" selected>⬇️ Total Recaudo (10M): Mayor a Menor</option>
+            <option value="rtot_asc">⬆️ Total Recaudo (10M): Menor a Mayor</option>
+            <option value="rdiff_desc">⬇️ Variación $ (M10-M01): Mayor a Menor</option>
+            <option value="rdiff_asc">⬆️ Variación $ (M10-M01): Menor a Mayor</option>
+            <option value="rgrowth_desc">⬇️ % Crec. Recaudo: Mayor a Menor</option>
+            <option value="cump_desc">⬇️ % Cumplimiento (10M): Mayor a Menor</option>
+            <option value="cump_asc">⬆️ % Cumplimiento (10M): Menor a Mayor</option>
+            <option value="az">🔤 Nombre: A → Z</option>
+            <option value="za">🔤 Nombre: Z → A</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="kpis-tab4" class="grid grid-cols-2 lg:grid-cols-4 gap-2.5"></div>
+      <div id="tab4-extra-note" class="text-[11px] bg-blue-50/70 border border-blue-200 rounded-md px-3 py-2 text-slate-700"></div>
+      <div id="chart-tab4-wrap"></div>
+      <div id="std-table-wrap" class="overflow-x-auto border border-slate-300 rounded-lg">
+        <table class="tbl-compact">
+          <thead id="thead-tab4"></thead>
+          <tbody id="tbody-tab4" class="font-mono tabular-nums"></tbody>
+        </table>
+      </div>
+
+      <!-- VISTA 3: CRECIMIENTO ANUAL REGIONAL (2023-2025) -->
+      <div id="sub-cartera-wrap" class="hidden space-y-3">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-2 pb-2 border-b border-slate-200">
+          <div>
+            <h2 class="text-sm md:text-base font-bold">Comportamiento Anual de Cartera por Regionales (2023 → 2024 → 2025)</h2>
+            <p class="text-[11px] text-slate-500">Fuente: CARTERA.ods | Crecimiento positivo en las 15 regionales/líneas (+34,7% consolidado | +$15.371M)</p>
+          </div>
+          <div class="flex flex-wrap gap-2 items-center">
+            <select id="t4e-sort" onchange="renderCarteraAnual()" class="px-2.5 py-1.5 text-xs font-bold rounded-md bg-blue-50/50 border-2 border-blue-600">
+              <option value="diff_desc" selected>⬇️ Diferencia ($ 2023→2025): Mayor a Menor</option>
+              <option value="diff_asc">⬆️ Diferencia ($ 2023→2025): Menor a Mayor</option>
+              <option value="y25_desc">⬇️ Cartera 2025 ($): Mayor a Menor</option>
+              <option value="y25_asc">⬆️ Cartera 2025 ($): Menor a Mayor</option>
+              <option value="pct_desc">⬇️ % Crecimiento (2023→2025): Mayor a Menor</option>
+              <option value="pct_asc">⬆️ % Crecimiento (2023→2025): Menor a Mayor</option>
+              <option value="y23_desc">⬇️ Cartera 2023 ($): Mayor a Menor</option>
+              <option value="az">🔤 Regional: A → Z</option>
+              <option value="za">🔤 Regional: Z → A</option>
+            </select>
+          </div>
+        </div>
+        <div id="kpis-cartera-anual" class="grid grid-cols-2 lg:grid-cols-4 gap-2.5"></div>
+        <div id="chart-cartera-wrap"></div>
+        <div class="overflow-x-auto border border-slate-300 rounded-lg">
+          <table class="tbl-compact">
+            <thead>
+              <tr class="grp-hdr">
+                <th class="bg-slate-200 text-slate-800 grp-sep">1. REGIONAL</th>
+                <th colspan="3" class="bg-blue-100 text-blue-900 grp-sep">2. EVOLUCIÓN ANUAL ($)</th>
+                <th colspan="4" class="bg-emerald-100 text-emerald-900">3. CRECIMIENTO Y EXPANSIÓN</th>
+              </tr>
+              <tr class="col-hdr">
+                <th onclick="toggleSelectSort('t4e-sort','az','za',renderCarteraAnual)" class="text-left grp-sep">Regional ⇅</th>
+                <th onclick="toggleSelectSort('t4e-sort','y23_desc','y23_asc',renderCarteraAnual)" class="text-right">2023 ($) ⇅</th>
+                <th onclick="toggleSelectSort('t4e-sort','y24_desc','y24_asc',renderCarteraAnual)" class="text-right">2024 ($) ⇅</th>
+                <th onclick="toggleSelectSort('t4e-sort','y25_desc','y25_asc',renderCarteraAnual)" class="text-right grp-sep">2025 ($) ⇅</th>
+                <th onclick="toggleSelectSort('t4e-sort','g23_24_desc','g23_24_asc',renderCarteraAnual)" class="text-center">% 23→24 ⇅</th>
+                <th onclick="toggleSelectSort('t4e-sort','g24_25_desc','g24_25_asc',renderCarteraAnual)" class="text-center">% 24→25 ⇅</th>
+                <th onclick="toggleSelectSort('t4e-sort','diff_desc','diff_asc',renderCarteraAnual)" class="text-right">Diferencia ($) ⇅</th>
+                <th onclick="toggleSelectSort('t4e-sort','pct_desc','pct_asc',renderCarteraAnual)" class="text-center">% Crec. 23→25 ⇅</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-cartera-anual" class="font-mono tabular-nums"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- VISTA 4: TENDENCIA ANUAL MEDIOS DE PAGO (2023-2026*) -->
+      <div id="sub-tendencia-wrap" class="hidden space-y-3">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-2 pb-2 border-b border-slate-200">
+          <div>
+            <h2 class="text-sm md:text-base font-bold">Tendencia Anual del Recaudo por Medio de Pago — Canal Masivos (2023 – 2026*)</h2>
+            <p class="text-[11px] text-slate-500">Fuente: Analisis_Tendencia_Recaudo.xlsx (Hoja Tendencias) | *2026 corresponde a información acumulada Enero–Octubre</p>
+          </div>
+          <div class="flex flex-wrap gap-1.5 items-center">
+            <div id="t4f-filter-pills" class="flex flex-wrap gap-1 items-center"></div>
+            <button onclick="reset4fFilters()" class="px-2.5 py-1.5 text-xs font-bold rounded-md bg-slate-200 hover:bg-slate-300 text-slate-800 border border-slate-300">
+              🧹 Limpiar filtros
+            </button>
+            <select id="t4f-sort" onchange="renderTendenciaMedios()" class="px-2.5 py-1.5 text-xs font-bold rounded-md bg-blue-50/50 border-2 border-blue-600">
+              <option value="crec_val_desc" selected>⬇️ Crecimiento 23→26* ($): Mayor a Menor</option>
+              <option value="crec_val_asc">⬆️ Crecimiento 23→26* ($): Menor a Mayor</option>
+              <option value="crec_pct_desc">⬇️ Crecimiento % (23→26*): Mayor a Menor</option>
+              <option value="crec_pct_asc">⬆️ Crecimiento % (23→26*): Menor a Mayor</option>
+              <option value="y26_desc">⬇️ Recaudo 2026* ($): Mayor a Menor</option>
+              <option value="y26_asc">⬆️ Recaudo 2026* ($): Menor a Mayor</option>
+              <option value="y25_desc">⬇️ Recaudo 2025 ($): Mayor a Menor</option>
+              <option value="az">🔤 Medio de Pago: A → Z</option>
+              <option value="za">🔤 Medio de Pago: Z → A</option>
+            </select>
+          </div>
+        </div>
+        <div id="kpis-tendencia-4f" class="grid grid-cols-2 lg:grid-cols-4 gap-2.5"></div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          <div id="chart-4f-line-wrap"></div>
+          <div id="chart-4f-bar-wrap"></div>
+        </div>
+        <div class="overflow-x-auto border border-slate-300 rounded-lg">
+          <table class="tbl-compact">
+            <thead>
+              <tr class="grp-hdr">
+                <th class="bg-slate-200 text-slate-800 grp-sep">1. MEDIO DE PAGO</th>
+                <th colspan="4" class="bg-blue-100 text-blue-900 grp-sep">2. RECAUDO ANUAL ($)</th>
+                <th colspan="4" class="bg-emerald-100 text-emerald-900">3. CRECIMIENTO (2023 → 2026*)</th>
+              </tr>
+              <tr class="col-hdr">
+                <th onclick="toggleSelectSort('t4f-sort','az','za',renderTendenciaMedios)" class="text-left grp-sep">Tipo Cobrador / Medio ⇅</th>
+                <th onclick="toggleSelectSort('t4f-sort','y23_desc','y23_asc',renderTendenciaMedios)" class="text-right">2023 ($) ⇅</th>
+                <th onclick="toggleSelectSort('t4f-sort','y24_desc','y24_asc',renderTendenciaMedios)" class="text-right">2024 ($) ⇅</th>
+                <th onclick="toggleSelectSort('t4f-sort','y25_desc','y25_asc',renderTendenciaMedios)" class="text-right">2025 ($) ⇅</th>
+                <th onclick="toggleSelectSort('t4f-sort','y26_desc','y26_asc',renderTendenciaMedios)" class="text-right grp-sep">2026* (Ene–Oct) ⇅</th>
+                <th onclick="toggleSelectSort('t4f-sort','g23_24_desc','g23_24_asc',renderTendenciaMedios)" class="text-center">% 23→24 ⇅</th>
+                <th onclick="toggleSelectSort('t4f-sort','g24_25_desc','g24_25_asc',renderTendenciaMedios)" class="text-center">% 24→25 ⇅</th>
+                <th onclick="toggleSelectSort('t4f-sort','crec_val_desc','crec_val_asc',renderTendenciaMedios)" class="text-right">Crecimiento ($) ⇅</th>
+                <th onclick="toggleSelectSort('t4f-sort','crec_pct_desc','crec_pct_asc',renderTendenciaMedios)" class="text-center">Crecimiento % ⇅</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-tendencia-4f" class="font-mono tabular-nums"></tbody>
+          </table>
+        </div>
+        <div class="text-[11px] text-slate-600 bg-slate-50 border border-slate-200 rounded-md px-3 py-2">
+          <strong>Nota:</strong> * 2026 corresponde a información acumulada hasta octubre; los demás años se mantienen con sus valores originales. Destaca que <strong>MEDIOS ELECTRONICOS (+67,7%)</strong> y <strong>PUNTO RECAUDO (+50,2%)</strong> ya superaron en 10 meses de 2026 todo el recaudo del año 2025.
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const TAB4_DATA = {"med":{"tot_pres_cols":[1728740219,1741919054,1733689937,1781455630,1715329596,1719580688,1749471097,1759237548,1768352768,1815641272],"tot_pres_grand":17513417809,"tot_rec_cols":[1319380032,1312972767,1499417510,1382904600,1507383180,1412638010,1550934543,1484532461,1495444199,1512787717],"tot_rec_grand":14478395019,"rows":[{"name":"Bancolombia S.a.","p_arr":[476007131,469187998,440573359,429579130,388915646,377562053,370972053,374778603,381590723,393984253],"p_tot":4103150949,"r_arr":[321394286,303448727,331927021,297442210,314482069,285464488,322444683,312223179,319985432,309502300],"r_tot":3118314395,"p_m1":476007131,"p_m10":393984253,"p_diff":-82022878,"p_growth":-0.1723143891304435,"r_m1":321394286,"r_m10":309502300,"r_diff":-11891986,"r_growth":-0.03700123654345242,"r_q1":318923344.6666667,"r_q4":313903637.0,"r_q_growth":-0.015739542904622428,"cump_tot":0.7599804232793289,"cump_m1":0.6751879647786201,"cump_m10":0.7855702293766548,"brecha_tot":984836554,"sh_m1":0.24352015961337561,"sh_m10":0.20459070134028592,"sh_tot":0.21534373788807343,"sh_diff_pp":-3.892945827308969},{"name":"Davivienda S.a","p_arr":[11478150,13135350,13515550,14317300,12708650,13516250,14576200,18835800,24415250,31334907],"p_tot":167833407,"r_arr":[14104233,16439010,22980840,15919280,25370590,27263048,38896080,42687170,59995783,67051712],"r_tot":330707746,"p_m1":11478150,"p_m10":31334907,"p_diff":19856757,"p_growth":1.7299614484912638,"r_m1":14104233,"r_m10":67051712,"r_diff":52947479,"r_growth":3.7540133518781205,"r_q1":17841361.0,"r_q4":56578221.666666664,"r_q_growth":2.1711830541776864,"cump_tot":1.970452437994064,"cump_m1":1.2287897439918454,"cump_m10":2.1398407852303505,"brecha_tot":-162874339,"sh_m1":0.010606751554161319,"sh_m10":0.04432327896802985,"sh_tot":0.022812204806506132,"sh_diff_pp":3.3716527413868533},{"name":"Facilisimo Quindio","p_arr":[94445300,96272300,97680100,99596600,97008350,98071450,98114150,97932550,98668710,100730410],"p_tot":978519920,"r_arr":[77851550,75779200,81344700,81800600,86473350,78555150,85519250,83820600,79050900,84349000],"r_tot":814544300,"p_m1":94445300,"p_m10":100730410,"p_diff":6285110,"p_growth":0.06654762068625966,"r_m1":77851550,"r_m10":84349000,"r_diff":6497450,"r_growth":0.0834594815389032,"r_q1":78325150.0,"r_q4":82406833.33333333,"r_q_growth":0.052112039789688605,"cump_tot":0.832424852424057,"cump_m1":0.8243030621957895,"cump_m10":0.8373737384767916,"brecha_tot":163975620,"sh_m1":0.0589880489728081,"sh_m10":0.055757327384487215,"sh_tot":0.05625058670116047,"sh_diff_pp":-0.3230721588320884},{"name":"Ganagana Seapto S.a","p_arr":[107600650,106977450,106549167,109054900,105407250,106183750,105335720,105721560,104831660,106010360],"p_tot":1063672467,"r_arr":[78865400,77242500,88525150,84501740,92385400,80452450,90642550,85890550,84373150,86905500],"r_tot":849784390,"p_m1":107600650,"p_m10":106010360,"p_diff":-1590290,"p_growth":-0.014779557558434823,"r_m1":78865400,"r_m10":86905500,"r_diff":8040100,"r_growth":0.10194711495789027,"r_q1":81544350.0,"r_q4":85723066.66666667,"r_q_growth":0.05124471121134293,"cump_tot":0.7989154710347504,"cump_m1":0.7329453864823308,"cump_m10":0.8197830853512807,"brecha_tot":213888077,"sh_m1":0.059756242200188686,"sh_m10":0.05744725385022412,"sh_tot":0.058684187596657125,"sh_diff_pp":-0.23089883499645691},{"name":"Pagatodo Pagatodo","p_arr":[9824150,9988400,10486500,10852300,10140750,9742400,10551750,10734900,10716300,10477000],"p_tot":103514450,"r_arr":[7390150,5760600,7059250,7825650,7857200,7494750,8517700,8302400,7628750,6608450],"r_tot":74444900,"p_m1":9824150,"p_m10":10477000,"p_diff":652850,"p_growth":0.06645358631535553,"r_m1":7390150,"r_m10":6608450,"r_diff":-781700,"r_growth":-0.10577593147635704,"r_q1":6736666.666666667,"r_q4":7513200.0,"r_q_growth":0.11526966848094998,"cump_tot":0.7191739897183437,"cump_m1":0.7522431966124296,"cump_m10":0.6307578505297318,"brecha_tot":29069550,"sh_m1":0.005599509966293513,"sh_m10":0.004368392158223744,"sh_tot":0.005140996385229411,"sh_diff_pp":-0.12311178080697693},{"name":"Pagos Suchance","p_arr":[79339860,76876010,76554710,77723940,71709340,71269180,69314380,67567080,66915530,65759080],"p_tot":723029110,"r_arr":[47527130,50326960,53310650,51598280,58167500,50863230,53367300,56615600,45713350,53588250],"r_tot":521078250,"p_m1":79339860,"p_m10":65759080,"p_diff":-13580780,"p_growth":-0.17117222036943347,"r_m1":47527130,"r_m10":53588250,"r_diff":6061120,"r_growth":0.12752968672840123,"r_q1":50388246.666666664,"r_q4":51972400.0,"r_q_growth":0.031438945351938606,"cump_tot":0.7206877880753653,"cump_m1":0.5990321888644623,"cump_m10":0.8149178790214219,"brecha_tot":201950860,"sh_m1":0.0360112633849553,"sh_m10":0.03542350945727569,"sh_tot":0.03598448516515795,"sh_diff_pp":-0.05877539276796101},{"name":"Pagos Apostar","p_arr":[104745550,104888320,105219000,104300650,102190350,100910650,100308500,101067150,100241850,101895180],"p_tot":1025767200,"r_arr":[83944602,84772170,91148670,87871600,92272500,84196000,92671452,87588950,86346551,86996031],"r_tot":877808526,"p_m1":104745550,"p_m10":101895180,"p_diff":-2850370,"p_growth":-0.027212325487813088,"r_m1":83944602,"r_m10":86996031,"r_diff":3051429,"r_growth":0.03635050887488871,"r_q1":86621814.0,"r_q4":86977177.33333333,"r_q_growth":0.004102469307942782,"cump_tot":0.8557580374962273,"cump_m1":0.8014144944582371,"cump_m10":0.8537796488509074,"brecha_tot":147958674,"sh_m1":0.06360474895848425,"sh_m10":0.057507097672977736,"sh_tot":0.06061947103279818,"sh_diff_pp":-0.6097651285506517},{"name":"Pagos Efecty","p_arr":[356359095,357111685,397712365,371535133,350066918,340279580,334037330,319690670,308296970,304475470],"p_tot":3439565216,"r_arr":[257967630,238015040,260680943,248893684,255833342,235846021,253550555,243689390,234648153,242027139],"r_tot":2471151897,"p_m1":356359095,"p_m10":304475470,"p_diff":-51883625,"p_growth":-0.1455936602375758,"r_m1":257967630,"r_m10":242027139,"r_diff":-15940491,"r_growth":-0.0617926016531609,"r_q1":252221204.33333334,"r_q4":240121560.66666666,"r_q_growth":-0.047972349107793105,"cump_tot":0.7184489148526149,"cump_m1":0.7238979827356448,"cump_m10":0.7948986465149392,"brecha_tot":968413319,"sh_m1":0.19546183976862683,"sh_m10":0.15998750933803357,"sh_tot":0.17065215978300463,"sh_diff_pp":-3.5474330430593253},{"name":"Pagos Gana","p_arr":[73280750,72262848,73399648,73179248,68854248,69461848,70321998,68788548,67344298,66769398],"p_tot":703662832,"r_arr":[50893633,50806048,55701781,53416398,57416748,52033148,53761148,52089958,47866148,51831198],"r_tot":525816208,"p_m1":73280750,"p_m10":66769398,"p_diff":-6511352,"p_growth":-0.08885487662175946,"r_m1":50893633,"r_m10":51831198,"r_diff":937565,"r_growth":0.018422048982040643,"r_q1":52467154.0,"r_q4":50595768.0,"r_q_growth":-0.03566776273018354,"cump_tot":0.7472559073576306,"cump_m1":0.6945020759203474,"cump_m10":0.7762717585082914,"brecha_tot":177846624,"sh_m1":0.03856205966108732,"sh_m10":0.03426204312577718,"sh_tot":0.036311677826460054,"sh_diff_pp":-0.43000165353101405},{"name":"Pagos Nequi","p_arr":[3618086,20209396,33393146,67405465,100387645,127449190,170331422,190819093,197814913,230622268],"p_tot":1142050624,"r_arr":[60241626,99208658,143930371,111248821,140251708,173043753,172605873,155861997,193615083,185173534],"r_tot":1435181424,"p_m1":3618086,"p_m10":230622268,"p_diff":227004182,"p_growth":62.74151084302584,"r_m1":60241626,"r_m10":185173534,"r_diff":124931908,"r_growth":2.0738468779046566,"r_q1":101126885.0,"r_q4":178216871.33333334,"r_q_growth":0.7623095117913831,"cump_tot":1.2566705834574283,"cump_m1":16.65013656391805,"cump_m10":0.802929984193894,"brecha_tot":-293130800,"sh_m1":0.04564502549646847,"sh_m10":0.12240549808747554,"sh_tot":0.09911038248331852,"sh_diff_pp":7.676047259100708},{"name":"Pagos Pse","p_arr":[136742650,137413300,139199675,143301425,135116550,134227350,133133800,131992300,132196000,128077450],"p_tot":1351400500,"r_arr":[103083828,102153379,126963680,118048695,136688469,115158692,143096970,117233846,110553199,107159249],"r_tot":1180140007,"p_m1":136742650,"p_m10":128077450,"p_diff":-8665200,"p_growth":-0.06336867100352377,"r_m1":103083828,"r_m10":107159249,"r_diff":4075421,"r_growth":0.03953501804376143,"r_q1":110733629.0,"r_q4":111648764.66666667,"r_q_growth":0.008264297620614165,"cump_tot":0.8732718442830234,"cump_m1":0.7538527884314075,"cump_m10":0.836675378843036,"brecha_tot":171260493,"sh_m1":0.07810652317607712,"sh_m10":0.07083561546395079,"sh_tot":0.08149779917834012,"sh_diff_pp":-0.7270907712126338},{"name":"Pagos Susuerte","p_arr":[55206400,55140450,55690250,56245430,55184380,55111480,55673180,56807680,57225230,58729380],"p_tot":561013860,"r_arr":[49597550,46930801,53170180,50294830,54458180,50291180,52597380,57347530,51178750,53766500],"r_tot":519632881,"p_m1":55206400,"p_m10":58729380,"p_diff":3522980,"p_growth":0.06381470264317181,"r_m1":49597550,"r_m10":53766500,"r_diff":4168950,"r_growth":0.0840555632284256,"r_q1":49899510.333333336,"r_q4":54097593.333333336,"r_q_growth":0.0841307454112559,"cump_tot":0.9262389364141557,"cump_m1":0.8984021780083469,"cump_m10":0.91549578762793,"brecha_tot":41380979,"sh_m1":0.0375800187450513,"sh_m10":0.03554133828282531,"sh_tot":0.035884671251722344,"sh_diff_pp":-0.20386804622259877},{"name":"Supergiros Red Empresarial De Servicios","p_arr":[220092447,222455547,183716467,224364109,217639519,215795507,216800614,214501614,218095334,216776116],"p_tot":2150237274,"r_arr":[166518414,162089674,182674274,174042812,185726124,171976100,183263602,181181291,174488950,177828854],"r_tot":1759790095,"p_m1":220092447,"p_m10":216776116,"p_diff":-3316331,"p_growth":-0.015067900081096377,"r_m1":166518414,"r_m10":177828854,"r_diff":11310440,"r_growth":0.06792305864743584,"r_q1":170427454.0,"r_q4":177833031.66666666,"r_q_growth":0.04345296190757304,"cump_tot":0.8184167004631694,"cump_m1":0.7565839549232691,"cump_m10":0.8203341644888591,"brecha_tot":390447179,"sh_m1":0.12617085157464858,"sh_m10":0.11755043487043332,"sh_tot":0.12152712297494551,"sh_diff_pp":-0.8620416704215261}]},"reg":{"tot_pres_cols":[1729034219,1742256054,1734190137,1781942730,1715768246,1720178188,1749993947,1759371148,1768465168,1815758572],"tot_pres_grand":17516958409,"tot_rec_cols":[1319785132,1313272267,1499866610,1383267800,1507679980,1413010210,1550980143,1484542461,1495444199,1512787717],"tot_rec_grand":14480636519,"rows":[{"name":"ANTIOQUIA","p_arr":[246332400,245498298,243717948,247766748,233313298,235142198,241634698,246092548,245399998,251749028],"p_tot":2436647162,"r_arr":[186088423,184946618,204360901,186405079,205149452,188883502,204812817,197569831,194092116,200789562],"r_tot":1953098301,"p_m1":246332400,"p_m10":251749028,"p_diff":5416628,"p_growth":0.02198910090593036,"r_m1":186088423,"r_m10":200789562,"r_diff":14701139,"r_growth":0.07900082532270156,"r_q1":191798647.33333334,"r_q4":197483836.33333334,"r_q_growth":0.029641444707999,"cump_tot":0.8015515465098758,"cump_m1":0.7554362438721013,"cump_m10":0.7975783008782859,"brecha_tot":483548861,"sh_m1":0.14099902968144667,"sh_m10":0.13272818105516124,"sh_tot":0.13487655038073398,"sh_diff_pp":-0.8270848626285437},{"name":"ATLANTICO","p_arr":[38505820,45630660,45671904,52892539,52376637,48803547,52413921,49320581,49780911,56463911],"p_tot":491860431,"r_arr":[16751589,21160073,28561214,26088672,31023984,29213960,31096482,28118636,28438450,31342327],"r_tot":271795387,"p_m1":38505820,"p_m10":56463911,"p_diff":17958091,"p_growth":0.4663734209529884,"r_m1":16751589,"r_m10":31342327,"r_diff":14590738,"r_growth":0.8710062072320423,"r_q1":22157625.333333332,"r_q4":29299804.333333332,"r_q_growth":0.3223350378280609,"cump_tot":0.5525864043330617,"cump_m1":0.4350404432368925,"cump_m10":0.5550860088313755,"brecha_tot":220065044,"sh_m1":0.012692663823704903,"sh_m10":0.02071825851557995,"sh_tot":0.01876957457245599,"sh_diff_pp":0.8025594691875048},{"name":"BOGOTA","p_arr":[51088601,51246443,51523600,54326600,51731900,51488950,52354450,53431950,52943050,58376675],"p_tot":528512219,"r_arr":[39475315,38162523,44441540,40295903,40420150,37561377,44109304,43201698,49237650,41231560],"r_tot":418137020,"p_m1":51088601,"p_m10":58376675,"p_diff":7288074,"p_growth":0.1426555798621301,"r_m1":39475315,"r_m10":41231560,"r_diff":1756245,"r_growth":0.04448970198211211,"r_q1":40693126.0,"r_q4":44556969.333333336,"r_q_growth":0.09495076228189832,"cump_tot":0.791158661934361,"cump_m1":0.7726834211020968,"cump_m10":0.706301960500491,"brecha_tot":110375199,"sh_m1":0.02991041044702419,"sh_m10":0.027255350857664323,"sh_tot":0.02887559669434169,"sh_diff_pp":-0.2655059589359868},{"name":"CALDAS","p_arr":[88831550,88807250,90636350,91204950,90618410,91031560,92032610,93877010,95455410,98375410],"p_tot":920870510,"r_arr":[80976450,80149601,88686235,87760600,90558200,85905590,92037540,92527650,87954850,90108810],"r_tot":876665526,"p_m1":88831550,"p_m10":98375410,"p_diff":9543860,"p_growth":0.10743772905009538,"r_m1":80976450,"r_m10":90108810,"r_diff":9132360,"r_growth":0.11277797433698317,"r_q1":83270762.0,"r_q4":90197103.33333333,"r_q_growth":0.08317855111417533,"cump_tot":0.9519965255484183,"cump_m1":0.9115730841125703,"cump_m10":0.9159688381476632,"brecha_tot":44204984,"sh_m1":0.06135578287451112,"sh_m10":0.05956474195777728,"sh_tot":0.06054053803848538,"sh_diff_pp":-0.17910409167338423},{"name":"CAUCA","p_arr":[44572950,45161500,44190200,47491765,44442250,42989845,43856360,43210810,43250900,44363200],"p_tot":443529780,"r_arr":[33431007,31022100,35435050,32970917,36647750,34846750,37465768,35507250,36646900,35592770],"r_tot":349566262,"p_m1":44572950,"p_m10":44363200,"p_diff":-209750,"p_growth":-0.004705768857569445,"r_m1":33431007,"r_m10":35592770,"r_diff":2161763,"r_growth":0.06466341262170176,"r_q1":33296052.333333332,"r_q4":35915640.0,"r_q_growth":0.07867562317723015,"cump_tot":0.7881460902129278,"cump_m1":0.7500290422778838,"cump_m10":0.8023039365960977,"brecha_tot":93963518,"sh_m1":0.025330643746030623,"sh_m10":0.02352793428980492,"sh_tot":0.024140255267186297,"sh_diff_pp":-0.18027094562257026},{"name":"CUNDINAMARCA","p_arr":[143927800,143202650,141174050,145168200,142474650,142162800,142942220,143013810,144511710,146522410],"p_tot":1435100300,"r_arr":[110216773,106780485,119956350,118150861,124570820,113330128,126283300,119527800,116942660,119786332],"r_tot":1175545509,"p_m1":143927800,"p_m10":146522410,"p_diff":2594610,"p_growth":0.018027163619537018,"r_m1":110216773,"r_m10":119786332,"r_diff":9569559,"r_growth":0.08682488825906742,"r_q1":112317869.33333333,"r_q4":118752264.0,"r_q_growth":0.05728736402193389,"cump_tot":0.8191382226036744,"cump_m1":0.7657782096301062,"cump_m10":0.8175290865062894,"brecha_tot":259554791,"sh_m1":0.08351114914666276,"sh_m10":0.07918251229428776,"sh_tot":0.08118051354010372,"sh_diff_pp":-0.4328636852375001},{"name":"HUILA","p_arr":[251846693,246475193,248072543,254808433,238193033,239981573,236715423,233638154,232663374,236166574],"p_tot":2418560993,"r_arr":[170412540,167718518,191045510,179516450,197056681,186851679,202013021,195640050,188795198,197149630],"r_tot":1876199277,"p_m1":251846693,"p_m10":236166574,"p_diff":-15680119,"p_growth":-0.06226057135481227,"r_m1":170412540,"r_m10":197149630,"r_diff":26737090,"r_growth":0.1568962589255462,"r_q1":176392189.33333334,"r_q4":193861626.0,"r_q_growth":0.099037472876161,"cump_tot":0.7757502425740974,"cump_m1":0.6766518867889204,"cump_m10":0.8347905745543821,"brecha_tot":542361716,"sh_m1":0.12912142732033746,"sh_m10":0.13032207214834227,"sh_tot":0.129566077743768,"sh_diff_pp":0.12006448280048043},{"name":"META","p_arr":[10771500,9109800,7903400,7222200,6036150,6260950,10057100,10807300,9843100,9531300],"p_tot":87542800,"r_arr":[4118050,4897300,5934250,4137400,5632050,4903700,5679350,5728900,5726900,5753190],"r_tot":52511090,"p_m1":10771500,"p_m10":9531300,"p_diff":-1240200,"p_growth":-0.1151371675254143,"r_m1":4118050,"r_m10":5753190,"r_diff":1635140,"r_growth":0.39706657277109314,"r_q1":4983200.0,"r_q4":5736330.0,"r_q_growth":0.15113380960025685,"cump_tot":0.5998333386640592,"cump_m1":0.38230979900663786,"cump_m10":0.6036102105693871,"brecha_tot":35031710,"sh_m1":0.0031202427578188537,"sh_m10":0.00380303854622056,"sh_tot":0.003626297085152324,"sh_diff_pp":0.06827957884017062},{"name":"PUTUMAYO","p_arr":[7837950,7360050,7395600,7732800,7308450,7431350,7178700,6874250,6727100,6473600],"p_tot":72319850,"r_arr":[6589550,6397600,6711800,6498800,7452900,6129950,6058900,5780750,5187700,5244100],"r_tot":62052050,"p_m1":7837950,"p_m10":6473600,"p_diff":-1364350,"p_growth":-0.17406975038115835,"r_m1":6589550,"r_m10":5244100,"r_diff":-1345450,"r_growth":-0.20417934456829373,"r_q1":6566316.666666667,"r_q4":5404183.333333333,"r_q_growth":-0.17698405244949614,"cump_tot":0.858022382513238,"cump_m1":0.840723658609713,"cump_m10":0.8100747652001977,"brecha_tot":10267800,"sh_m1":0.0049928960709037596,"sh_m10":0.003466514132200612,"sh_tot":0.004285174199254411,"sh_diff_pp":-0.15263819387031477},{"name":"QUINDIO","p_arr":[152988700,157197900,159139500,163480250,159697580,162584880,164234950,165206450,166817910,171660810],"p_tot":1623008930,"r_arr":[126761916,121754890,142723564,134585850,147281462,133666738,146407566,141614588,139430703,148611763],"r_tot":1382839040,"p_m1":152988700,"p_m10":171660810,"p_diff":18672110,"p_growth":0.12204894871320561,"r_m1":126761916,"r_m10":148611763,"r_diff":21849847,"r_growth":0.17236917592820228,"r_q1":130413456.66666667,"r_q4":143219018.0,"r_q_growth":0.09819202450912717,"cump_tot":0.8520218308349049,"cump_m1":0.8285704499744099,"cump_m10":0.86572912594319,"brecha_tot":240169890,"sh_m1":0.09604738902301864,"sh_m10":0.0982370238269194,"sh_tot":0.09549573585288057,"sh_diff_pp":0.21896348039007613},{"name":"RISARALDA","p_arr":[137389950,138138655,136665635,138202285,136255785,136878125,139622025,141890575,143324035,144729972],"p_tot":1393097042,"r_arr":[112257032,120423310,131654148,113853900,127503410,120428645,131429110,119487610,131168735,126161831],"r_tot":1234367731,"p_m1":137389950,"p_m10":144729972,"p_diff":7340022,"p_growth":0.05342473739891455,"r_m1":112257032,"r_m10":126161831,"r_diff":13904799,"r_growth":0.12386572807305292,"r_q1":121444830.0,"r_q4":125606058.66666667,"r_q_growth":0.034264354165316646,"cump_tot":0.8860601191341845,"cump_m1":0.8170687302819457,"cump_m10":0.8717049361413544,"brecha_tot":158729311,"sh_m1":0.085057051544357,"sh_m10":0.08339691655494846,"sh_tot":0.08524264312417412,"sh_diff_pp":-0.1660134989408535},{"name":"SANTANDER","p_arr":[18607300,19167700,17350800,17750150,17744783,17696800,18277600,17484200,18045050,18193450],"p_tot":180317833,"r_arr":[10191750,9166640,13306690,9838800,14159050,14402230,16511300,15757958,15257650,13716050],"r_tot":132308118,"p_m1":18607300,"p_m10":18193450,"p_diff":-413850,"p_growth":-0.022241270899055747,"r_m1":10191750,"r_m10":13716050,"r_diff":3524300,"r_growth":0.34579929845217944,"r_q1":10888360.0,"r_q4":14910552.666666666,"r_q_growth":0.3694029832469413,"cump_tot":0.7337494899908208,"cump_m1":0.5477285796434732,"cump_m10":0.7539004421921076,"brecha_tot":48009715,"sh_m1":0.007722279750610192,"sh_m10":0.00906673807955039,"sh_tot":0.00913689932251244,"sh_diff_pp":0.1344458328940198},{"name":"TOLIMA","p_arr":[119107000,119662350,120461817,123919530,119638080,119850680,121124480,120842630,121088110,123999260],"p_tot":1209693937,"r_arr":[87028300,92637600,111676180,100226281,107925930,98924062,114769312,108109987,106240018,111816704],"r_tot":1039354374,"p_m1":119107000,"p_m10":123999260,"p_diff":4892260,"p_growth":0.041074496041374566,"r_m1":87028300,"r_m10":111816704,"r_diff":24788404,"r_growth":0.2848315318120657,"r_q1":97114026.66666667,"r_q4":108722236.33333333,"r_q_growth":0.1195317511291193,"cump_tot":0.8591878839845751,"cump_m1":0.7306732601778233,"cump_m10":0.9017529943323855,"brecha_tot":170339563,"sh_m1":0.06594126414207854,"sh_m10":0.07391433890125908,"sh_tot":0.0717754618477072,"sh_diff_pp":0.7973074759180534},{"name":"VALLE CENTRO","p_arr":[57984350,59372900,59190650,61858850,61060300,61305050,61689000,64268450,67832210,70050710],"p_tot":624612470,"r_arr":[51880080,49590150,55717830,48287589,55173500,52480680,64980035,61936110,63589550,60772950],"r_tot":564408474,"p_m1":57984350,"p_m10":70050710,"p_diff":12066360,"p_growth":0.20809683992318617,"r_m1":51880080,"r_m10":60772950,"r_diff":8892870,"r_growth":0.17141203328907742,"r_q1":52396020.0,"r_q4":62099536.666666664,"r_q_growth":0.185195682165681,"cump_tot":0.903613842355725,"cump_m1":0.8947255595690906,"cump_m10":0.8675565172715595,"brecha_tot":60203996,"sh_m1":0.03930948966016993,"sh_m10":0.04017282089024259,"sh_tot":0.038976772413245875,"sh_diff_pp":0.08633312300726642},{"name":"VALLE CENTRO PALMIRA","p_arr":[113878460,116852810,116736370,119723610,116673620,119016460,123714510,125104060,126743450,130569980],"p_tot":1209013330,"r_arr":[90289228,89144488,105223048,96521619,105020230,103454700,107380890,112723893,111809530,111274160],"r_tot":1032841786,"p_m1":113878460,"p_m10":130569980,"p_diff":16691520,"p_growth":0.1465731096117738,"r_m1":90289228,"r_m10":111274160,"r_diff":20984932,"r_growth":0.23241899908591532,"r_q1":94885588.0,"r_q4":111935861.0,"r_q_growth":0.1796929687572785,"cump_tot":0.8542848621859281,"cump_m1":0.7928560677761185,"cump_m10":0.8522185574356372,"brecha_tot":176171544,"sh_m1":0.0684120663362648,"sh_m10":0.07355570034681871,"sh_tot":0.07132571725316159,"sh_diff_pp":0.5143634010553912},{"name":"VALLE NORTE","p_arr":[60809825,62184125,61620050,61471000,59839350,60331200,61270600,63049470,64426330,65609980],"p_tot":620611930,"r_arr":[56251655,51633070,59152060,53335048,56424160,52701726,60331450,57277200,61090809,61596875],"r_tot":569794053,"p_m1":60809825,"p_m10":65609980,"p_diff":4800155,"p_growth":0.07893716188132427,"r_m1":56251655,"r_m10":61596875,"r_diff":5345220,"r_growth":0.09502333753558007,"r_q1":55678928.333333336,"r_q4":59988294.666666664,"r_q_growth":0.07739671833362924,"cump_tot":0.9181164999519104,"cump_m1":0.9250422115176289,"cump_m10":0.9388339243511429,"brecha_tot":50817877,"sh_m1":0.04262182808102736,"sh_m10":0.04071746108710638,"sh_tot":0.03934868831576395,"sh_diff_pp":-0.19043669939209779},{"name":"VALLE SUR CALI","p_arr":[184553370,187187770,182739720,186922820,178363970,177222220,180875300,181258900,179612520,182922302],"p_tot":1821658892,"r_arr":[137065474,137687301,155280240,144794031,155680251,149324793,159613998,144032550,153834780,151839103],"r_tot":1489152521,"p_m1":184553370,"p_m10":182922302,"p_diff":-1631068,"p_growth":-0.00883792043461466,"r_m1":137065474,"r_m10":151839103,"r_diff":14773629,"r_growth":0.10778519614647815,"r_q1":143344338.33333334,"r_q4":149902144.33333334,"r_q_growth":0.04574862234705398,"cump_tot":0.8174705635285313,"cump_m1":0.7426874621688024,"cump_m10":0.8300743066310198,"brecha_tot":332506371,"sh_m1":0.10385438559403319,"sh_m10":0.10037039651611608,"sh_tot":0.10283750434907246,"sh_diff_pp":-0.348398907791711}]}};
+    const CARTERA_ANUAL_DATA = {"rows":[{"name":"Santander","y23":24860750.0,"y24":221466290.0,"y25":408402112.0,"diff":383541362.0,"pct":1542.75861347707,"g23_24":790.8270667618635,"g24_25":84.4082510254721},{"name":"Atlantico","y23":232610611.0,"y24":301369840.0,"y25":563737249.0,"diff":331126638.0,"pct":142.352335766832,"g23_24":29.55979897236932,"g24_25":87.05828327081436},{"name":"Tolima","y23":2568560740.0,"y24":3266772108.0,"y25":3921471524.0,"diff":1352910784.0,"pct":52.6719404735587,"g23_24":27.182980613493296,"g24_25":20.041171969012048},{"name":"Valle Centro","y23":2799722376.0,"y24":3693909185.0,"y25":4223207705.0,"diff":1423485329.0,"pct":50.8438029857,"g23_24":31.938409917541055,"g24_25":14.328953244149666},{"name":"Valle Sur Cali y cauca","y23":3752991495.0,"y24":4727174124.0,"y25":5400014637.0,"diff":1647023142.0,"pct":43.8856081660265,"g23_24":25.95749631455,"g24_25":14.233461585093075},{"name":"Valle Centro Palmira","y23":2189690716.0,"y24":2522757787.0,"y25":3149769091.0,"diff":960078375.0,"pct":43.8453872953261,"g23_24":15.210690193198955,"g24_25":24.8542015103886},{"name":"Bogota","y23":405458205.0,"y24":526090571.0,"y25":571968455.0,"diff":166510250.0,"pct":41.0671797849053,"g23_24":29.752108728444647,"g24_25":8.720529606298532},{"name":"Valle Norte","y23":4061525090.0,"y24":4936255900.0,"y25":5580193662.0,"diff":1518668572.0,"pct":37.391584154906695,"g23_24":21.5370037268439,"g24_25":13.04506441815547},{"name":"Antioquia","y23":3236617766.0,"y24":3770810258.0,"y25":4432022770.0,"diff":1195405004.0,"pct":36.9337713139155,"g23_24":16.504651788406456,"g24_25":17.53502474957996},{"name":"Huila","y23":2803107663.0,"y24":3154893406.0,"y25":3697442990.0,"diff":894335327.0,"pct":31.9051365313185,"g23_24":12.549847715214213,"g24_25":17.19708130132622},{"name":"Empresarial","y23":2909419195.0,"y24":3230371966.0,"y25":3758835465.0,"diff":849416270.0,"pct":29.195389631709602,"g23_24":11.031506616563723,"g24_25":16.359215117086613},{"name":"C/marca","y23":3570653801.0,"y24":3988261222.0,"y25":4550967138.0,"diff":980313337.0,"pct":27.454729347478402,"g23_24":11.695544969468743,"g24_25":14.109053662182614},{"name":"Caldas","y23":4785396848.0,"y24":5396614125.0,"y25":6007990419.0,"diff":1222593571.0,"pct":25.548425968286598,"g23_24":12.772551502294968,"g24_25":11.328886591460716},{"name":"Risaralda","y23":4836614063.0,"y24":5255122160.0,"y25":5977503018.0,"diff":1140888955.0,"pct":23.588587804178502,"g23_24":8.65291486045121,"g24_25":13.746223893680142},{"name":"Quindio","y23":6161388674.0,"y24":6544296648.0,"y25":7466317601.0,"diff":1304928927.0,"pct":21.1791366531798,"g23_24":6.214637547795123,"g24_25":14.088923571057531}],"tot":{"y23":44338617993.0,"y24":51536165590.0,"y25":59709843836.0,"diff":15371225843.0,"pct":34.66780549052464}};
+    const TENDENCIA_4F_DATA = {"years":["2023","2024","2025","2026*"],"series":[{"name":"COBRADOR","y23":20851756864.0,"y24":23014806974.0,"y25":25675619214.0,"y26":24633223998.0,"crec_val":3781467134.0,"crec_pct":18.135004923871,"g23_24":10.373466965435647,"g24_25":11.561305914952664,"sh23":50.504468058644825,"sh26":44.34923000779462,"sh_pp":-6.155238050850208},{"name":"OFICINA","y23":10994507124.0,"y24":13083920440.0,"y25":15249716080.0,"y26":15166243985.0,"crec_val":4171736861.0,"crec_pct":37.9438278946901,"g23_24":19.00415627944797,"g24_25":16.55310921471791,"sh23":26.629493979150638,"sh26":27.30504309544324,"sh_pp":0.6755491162926006},{"name":"MEDIOS ELECTRONICOS","y23":8955364482.0,"y24":11708130428.0,"y25":14779444107.0,"y26":15015167555.0,"crec_val":6059803073.0,"crec_pct":67.6667385808809,"g23_24":30.738737117098612,"g24_25":26.232315209394592,"sh23":21.690542546827356,"sh26":27.03304770647708,"sh_pp":5.3425051596497255},{"name":"PUNTO RECAUDO","y23":485326260.0,"y24":579115690.0,"y25":671956161.0,"y26":729111205.0,"crec_val":243784945.0,"crec_pct":50.231146569320195,"g23_24":19.325026838646643,"g24_25":16.0314204230937,"sh23":1.1754954153771757,"sh26":1.3126791902850659,"sh_pp":0.13718377490789013}],"tot":{"y23":41286954730.0,"y24":48385973532.0,"y25":56376735562.0,"y26":55543746743.0,"crec_val":14256792013.0,"crec_pct":34.53098468083601}};
+
+    let currentSubTab = "med";
+    let filter4fMedio = "ALL";
+
+    const fmtInt = (n) => Number(n || 0).toLocaleString("es-CO");
+    const fmtCurr = (n) => "$ " + Number(n || 0).toLocaleString("es-CO");
+    const fmtPct = (n) => Number(n || 0).toFixed(1).replace(".", ",") + "%";
+    const cmpStr = (a, b) => String(a || "").localeCompare(String(b || ""), "es", { sensitivity: "base" });
+
+    function badgeEf(pct) {
+      if (pct >= 90) return `<span class="px-1.5 py-0.5 rounded text-[10.5px] font-bold bg-emerald-500/15 text-emerald-700">${fmtPct(pct)}</span>`;
+      if (pct >= 75) return `<span class="px-1.5 py-0.5 rounded text-[10.5px] font-bold bg-amber-500/15 text-amber-700">${fmtPct(pct)}</span>`;
+      return `<span class="px-1.5 py-0.5 rounded text-[10.5px] font-bold bg-red-500/15 text-red-700">${fmtPct(pct)}</span>`;
+    }
+
+    function toggleSelectSort(selectId, descVal, ascVal, fn) {
+      const sel = document.getElementById(selectId);
+      if (!sel) return;
+      const cur = sel.dataset.customSort || sel.value;
+      const next = (cur === descVal) ? ascVal : descVal;
+      const opt = Array.from(sel.options).find(o => o.value === next);
+      if (opt) {
+        sel.value = next;
+        delete sel.dataset.customSort;
+      } else {
+        sel.dataset.customSort = next;
+      }
+      fn(next);
+    }
+
+    function sortObjects(arr, mode) {
+      return [...arr].sort((a, b) => {
+        if (mode === "az") return cmpStr(a.name, b.name);
+        if (mode === "za") return cmpStr(b.name, a.name);
+        if (mode.endsWith("_desc")) {
+          const k = mode.slice(0, -5);
+          return (b[k] || 0) - (a[k] || 0);
+        }
+        if (mode.endsWith("_asc")) {
+          const k = mode.slice(0, -4);
+          return (a[k] || 0) - (b[k] || 0);
+        }
+        return 0;
+      });
+    }
+
+    function ensureBarTip() {
+      let tip = document.getElementById("svg-bar-tooltip");
+      if (!tip) {
+        tip = document.createElement("div");
+        tip.id = "svg-bar-tooltip";
+        tip.className = "fixed z-50 hidden pointer-events-none bg-slate-900 text-white text-[11px] px-2.5 py-1.5 rounded-md shadow-lg max-w-xs leading-snug";
+        document.body.appendChild(tip);
+      }
+      return tip;
+    }
+    function showBarTip(evt, html) {
+      const tip = ensureBarTip();
+      tip.innerHTML = html;
+      tip.classList.remove("hidden");
+      tip.style.left = Math.min(window.innerWidth - 260, evt.clientX + 12) + "px";
+      tip.style.top = Math.max(10, evt.clientY - 36) + "px";
+    }
+    function hideBarTip() {
+      const tip = document.getElementById("svg-bar-tooltip");
+      if (tip) tip.classList.add("hidden");
+    }
+
+    function renderVerticalBarChartSVG(containerId, title, subtitle, items, opts = {}) {
+      const el = document.getElementById(containerId);
+      if (!el) return;
+      if (!items.length) {
+        el.innerHTML = `<div class="p-4 text-center text-xs text-slate-500">Sin datos para graficar.</div>`;
+        return;
+      }
+      const isHalf = !!opts.halfWidth;
+      const W = isHalf ? 580 : 1080;
+      const few = items.length <= 6;
+      const H = isHalf ? 310 : (few ? 275 : 315);
+      const padL = isHalf ? 56 : 64, padR = 22, padT = 46, padB = few ? 42 : 76;
+      const plotW = W - padL - padR, plotH = H - padT - padB;
+      const maxVal = Math.max(...items.map(d => Math.abs(d.val)), 1);
+      const hasNeg = items.some(d => d.val < 0);
+      const minVal = hasNeg ? Math.min(...items.map(d => d.val), 0) : 0;
+      const span = (maxVal - minVal) || 1;
+      const yZero = padT + (maxVal / span) * plotH;
+      const step = plotW / items.length;
+      const barW = Math.min(few ? 72 : 46, Math.max(16, step * (few ? 0.52 : 0.62)));
+      const fsTop = (isHalf || few) ? 11 : 9.5;
+      const fsSub = (isHalf || few) ? 10.5 : 8.5;
+      const fsX = (isHalf || few) ? 11.5 : 9.5;
+
+      const gridLines = [0, 0.25, 0.5, 0.75, 1].map(f => {
+        const valAt = minVal + span * (1 - f);
+        const y = padT + f * plotH;
+        const lbl = Math.abs(valAt) >= 1000 ? (valAt / 1000).toFixed(1).replace(".", ",") + "MM" : valAt.toFixed(0) + "M";
+        return `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="#e2e8f0" stroke-dasharray="3,3" />
+                <text x="${padL - 6}" y="${y + 3.5}" text-anchor="end" font-size="10" fill="#64748b" font-family="monospace">${lbl}</text>`;
+      }).join("");
+
+      const barsSvg = items.map((d, idx) => {
+        const cx = padL + idx * step + step / 2;
+        const x = cx - barW / 2;
+        const barH = Math.max(4, (Math.abs(d.val) / span) * plotH);
+        const y = d.val >= 0 ? (yZero - barH) : yZero;
+        const lblY = d.val >= 0 ? Math.max(24, y - 6) : (y + barH + 13);
+        const shortName = few ? d.label : (d.label.length > 16 ? d.label.slice(0, 15) + "…" : d.label);
+        const safeTip = (d.tip || "").replace(/"/g, "&quot;");
+        const xAttr = few
+          ? `x="${cx}" y="${H - padB + 20}" text-anchor="middle"`
+          : `x="${cx}" y="${H - padB + 14}" text-anchor="end" transform="rotate(-24 ${cx} ${H - padB + 14})"`;
+        return `<g class="cursor-pointer group" onclick="${d.onClick || ''}" onmouseenter="showBarTip(evt, '${safeTip}')" onmouseleave="hideBarTip()">
+          <rect x="${x}" y="${y}" width="${barW}" height="${barH}" rx="5" fill="${d.color}" opacity="0.92" />
+          <text x="${cx}" y="${lblY}" text-anchor="middle" font-size="${fsTop}" font-weight="700" fill="${d.txtColor || '#0f172a'}">${d.topLabel}</text>
+          ${d.subTop ? `<text x="${cx}" y="${lblY - 13}" text-anchor="middle" font-size="${fsSub}" font-weight="700" fill="${d.subColor || '#475569'}">${d.subTop}</text>` : ""}
+          <text ${xAttr} font-size="${fsX}" font-weight="700" fill="#1e293b">${shortName}</text>
+        </g>`;
+      }).join("");
+
+      el.innerHTML = `
+        <div class="bg-white border border-slate-300 rounded-lg p-3 relative">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1.5">
+            <div>
+              <div class="text-xs font-bold text-slate-800">${title}</div>
+              <div class="text-[10.5px] text-slate-500">${subtitle}</div>
+            </div>
+            <div class="text-[10px] text-slate-400 font-medium">Pasa el cursor sobre cada columna para ver el detalle</div>
+          </div>
+          <svg viewBox="0 0 ${W} ${H}" class="w-full h-auto select-none">
+            ${gridLines}
+            <line x1="${padL}" y1="${yZero}" x2="${W - padR}" y2="${yZero}" stroke="#475569" stroke-width="1.2" />
+            ${barsSvg}
+          </svg>
+        </div>
+      `;
+    }
+
+    function switchSubTab(sub) {
+      currentSubTab = sub;
+      ["med", "reg", "cartera_anual", "tendencia_medios"].forEach(k => {
+        const b = document.getElementById("btn-sub-" + k);
+        if (!b) return;
+        b.className = (k === sub)
+          ? "sub-btn px-3 py-1.5 rounded-md text-xs font-bold bg-blue-600 text-white"
+          : "sub-btn px-3 py-1.5 rounded-md text-xs font-bold bg-slate-100 text-slate-700 border border-slate-300";
+      });
+      const stdCtrl = document.getElementById("std-controls");
+      const kpis4 = document.getElementById("kpis-tab4");
+      const note4 = document.getElementById("tab4-extra-note");
+      const ch4 = document.getElementById("chart-tab4-wrap");
+      const tbl4 = document.getElementById("std-table-wrap");
+      const cWrap = document.getElementById("sub-cartera-wrap");
+      const tWrap = document.getElementById("sub-tendencia-wrap");
+
+      if (sub === "cartera_anual") {
+        [stdCtrl, kpis4, note4, ch4, tbl4, tWrap].forEach(el => el && el.classList.add("hidden"));
+        cWrap.classList.remove("hidden");
+        renderCarteraAnual();
+      } else if (sub === "tendencia_medios") {
+        [stdCtrl, kpis4, note4, ch4, tbl4, cWrap].forEach(el => el && el.classList.add("hidden"));
+        tWrap.classList.remove("hidden");
+        renderTendenciaMedios();
+      } else {
+        [cWrap, tWrap].forEach(el => el && el.classList.add("hidden"));
+        [stdCtrl, kpis4, note4, ch4, tbl4].forEach(el => el && el.classList.remove("hidden"));
+        renderTab4();
+      }
+    }
+
+    function renderTab4(overrideSort) {
+      const view = document.getElementById("t4-view").value;
+      const sortBy = overrideSort || document.getElementById("t4-sort").dataset.customSort || document.getElementById("t4-sort").value;
+      const sq = (document.getElementById("t4-search").value || "").toLowerCase();
+      const block = TAB4_DATA[currentSubTab];
+      const lblEnt = currentSubTab === "med" ? "Medio Electrónico" : "Zona / Regional";
+      document.getElementById("std-title").textContent = currentSubTab === "med"
+        ? "Medios Electrónicos — Evolución Mensual M01 a M10"
+        : "Medios por Zona / Regional — Evolución Mensual M01 a M10";
+
+      const p1 = block.tot_pres_cols[0], p10 = block.tot_pres_cols[9], pt = block.tot_pres_grand;
+      const r1 = block.tot_rec_cols[0], r10 = block.tot_rec_cols[9], rt = block.tot_rec_grand;
+      const pGr = ((p10 - p1) / p1 * 100), rGr = ((r10 - r1) / r1 * 100), cumpTot = (rt / pt * 100);
+      const rVar = r10 - r1;
+
+      document.getElementById("kpis-tab4").innerHTML = `
+        <div class="bg-slate-50 border border-slate-200 rounded-lg p-2.5 border-l-4 border-l-blue-600">
+          <div class="text-[11px] text-slate-600 font-medium">Presupuesto Acumulado (M01–M10)</div>
+          <div class="text-sm md:text-base font-bold font-mono text-blue-700 mt-0.5">${fmtCurr(pt)}</div>
+          <div class="text-[10.5px] text-slate-500">M01→M10: ${(pGr>=0?"+":"")+fmtPct(pGr)}</div>
+        </div>
+        <div class="bg-slate-50 border border-slate-200 rounded-lg p-2.5 border-l-4 border-l-emerald-600">
+          <div class="text-[11px] text-slate-600 font-medium">Recaudo Acumulado (M01–M10)</div>
+          <div class="text-sm md:text-base font-bold font-mono text-emerald-700 mt-0.5">${fmtCurr(rt)}</div>
+          <div class="text-[10.5px] text-slate-500">Cumplimiento: ${fmtPct(cumpTot)}</div>
+        </div>
+        <div class="bg-slate-50 border border-slate-200 rounded-lg p-2.5 border-l-4 border-l-emerald-500">
+          <div class="text-[11px] text-slate-600 font-medium">Crecimiento Mensual Recaudo (M01→M10)</div>
+          <div class="text-sm md:text-base font-bold font-mono text-emerald-700 mt-0.5">${(rVar>=0?"+$ ":"-$ ")+fmtInt(Math.abs(rVar))} (${(rGr>=0?"+":"")+fmtPct(rGr)})</div>
+          <div class="text-[10.5px] text-slate-500">M01: ${fmtCurr(r1)} → M10: ${fmtCurr(r10)}</div>
+        </div>
+        <div class="bg-slate-50 border border-slate-200 rounded-lg p-2.5 border-l-4 border-l-amber-500">
+          <div class="text-[11px] text-slate-600 font-medium">Brecha vs Presupuesto (10M)</div>
+          <div class="text-sm md:text-base font-bold font-mono text-amber-700 mt-0.5">${fmtCurr(pt - rt)}</div>
+          <div class="text-[10.5px] text-slate-500">${block.rows.length} ítems activos</div>
+        </div>
+      `;
+
+      document.getElementById("tab4-extra-note").innerHTML = currentSubTab === "med"
+        ? `<strong>Medios Electrónicos (${n_med} Medios):</strong> <strong>Pagos Nequi (+207,4% | 125,7% cumpl.)</strong> y <strong>Davivienda S.a (+379,0% | 196,9% cumpl.)</strong> lideran el crecimiento mensual entre M01 y M10.`
+        : `<strong>Medios por Zona / Regional (17 Zonas):</strong> 16 de las 17 zonas crecieron en recaudo entre M01 y M10. Lideran en crecimiento nominal <strong>Huila (+$26,74M)</strong>, <strong>Tolima (+$24,79M)</strong> y <strong>Quindío (+$21,85M)</strong>; y en cumplimiento <strong>Caldas (95,2%)</strong>, <strong>Valle Norte (91,8%)</strong> y <strong>Valle Centro (90,4%)</strong>.`;
+
+      let rows = block.rows.filter(r => !sq || r.name.toLowerCase().includes(sq));
+      rows.sort((a, b) => {
+        if (sortBy === "az") return cmpStr(a.name, b.name);
+        if (sortBy === "za") return cmpStr(b.name, a.name);
+        if (sortBy === "rtot_desc") return b.r_tot - a.r_tot;
+        if (sortBy === "rtot_asc") return a.r_tot - b.r_tot;
+        if (sortBy === "ptot_desc") return b.p_tot - a.p_tot;
+        if (sortBy === "ptot_asc") return a.p_tot - b.p_tot;
+        if (sortBy === "rdiff_desc") return b.r_diff - a.r_diff;
+        if (sortBy === "rdiff_asc") return a.r_diff - b.r_diff;
+        if (sortBy === "rgrowth_desc") return b.r_growth - a.r_growth;
+        if (sortBy === "rgrowth_asc") return a.r_growth - b.r_growth;
+        if (sortBy === "pgrowth_desc") return b.p_growth - a.p_growth;
+        if (sortBy === "pgrowth_asc") return a.p_growth - b.p_growth;
+        if (sortBy === "cump_desc") return b.cump_tot - a.cump_tot;
+        if (sortBy === "cump_asc") return a.cump_tot - b.cump_tot;
+        if (sortBy === "pm1_desc") return b.p_m1 - a.p_m1;
+        if (sortBy === "pm1_asc") return a.p_m1 - b.p_m1;
+        if (sortBy === "pm10_desc") return b.p_m10 - a.p_m10;
+        if (sortBy === "pm10_asc") return a.p_m10 - b.p_m10;
+        if (sortBy === "rm1_desc") return b.r_m1 - a.r_m1;
+        if (sortBy === "rm1_asc") return a.r_m1 - b.r_m1;
+        if (sortBy === "rm10_desc") return b.r_m10 - a.r_m10;
+        if (sortBy === "rm10_asc") return a.r_m10 - b.r_m10;
+        if (sortBy.startsWith("m_")) {
+          const parts = sortBy.split("_");
+          const mIdx = parseInt(parts[1], 10);
+          const dir = parts[2];
+          const valA = view === "PRES_M" ? a.p_arr[mIdx] : (view === "REC_M" ? a.r_arr[mIdx] : (a.p_arr[mIdx] ? a.r_arr[mIdx]/a.p_arr[mIdx] : 0));
+          const valB = view === "PRES_M" ? b.p_arr[mIdx] : (view === "REC_M" ? b.r_arr[mIdx] : (b.p_arr[mIdx] ? b.r_arr[mIdx]/b.p_arr[mIdx] : 0));
+          return dir === "desc" ? valB - valA : valA - valB;
+        }
+        return 0;
+      });
+
+      const thead = document.getElementById("thead-tab4");
+      const tbody = document.getElementById("tbody-tab4");
+
+      if (view === "GROWTH") {
+        thead.innerHTML = `
+          <tr class="grp-hdr">
+            <th class="bg-slate-200 text-slate-800 grp-sep">1. CANAL / ZONA</th>
+            <th colspan="3" class="bg-slate-100 text-slate-800 grp-sep">2. PRESUPUESTO (M01 → M10)</th>
+            <th colspan="4" class="bg-emerald-100 text-emerald-900 grp-sep">3. RECAUDO Y CRECIMIENTO (M01 → M10)</th>
+            <th colspan="3" class="bg-amber-100 text-amber-900">4. ACUMULADO 10 MESES</th>
+          </tr>
+          <tr class="col-hdr">
+            <th onclick="toggleSelectSort('t4-sort','az','za',renderTab4)" class="text-left grp-sep">${lblEnt} ⇅</th>
+            <th onclick="toggleSelectSort('t4-sort','pm1_desc','pm1_asc',renderTab4)" class="text-right">Presup. M01 ⇅</th>
+            <th onclick="toggleSelectSort('t4-sort','pm10_desc','pm10_asc',renderTab4)" class="text-right">Presup. M10 ⇅</th>
+            <th onclick="toggleSelectSort('t4-sort','pgrowth_desc','pgrowth_asc',renderTab4)" class="text-center grp-sep">% Crec. Pres. ⇅</th>
+            <th onclick="toggleSelectSort('t4-sort','rm1_desc','rm1_asc',renderTab4)" class="text-right bg-emerald-50/50">Recaudo M01 ⇅</th>
+            <th onclick="toggleSelectSort('t4-sort','rm10_desc','rm10_asc',renderTab4)" class="text-right bg-emerald-50/50">Recaudo M10 ⇅</th>
+            <th onclick="toggleSelectSort('t4-sort','rdiff_desc','rdiff_asc',renderTab4)" class="text-right bg-emerald-100/60 font-bold">Var. $ (M10-M01) ⇅</th>
+            <th onclick="toggleSelectSort('t4-sort','rgrowth_desc','rgrowth_asc',renderTab4)" class="text-center bg-emerald-100/60 font-bold grp-sep">% Crec. Rec. ⇅</th>
+            <th onclick="toggleSelectSort('t4-sort','ptot_desc','ptot_asc',renderTab4)" class="text-right">Presupuesto (10M) ⇅</th>
+            <th onclick="toggleSelectSort('t4-sort','rtot_desc','rtot_asc',renderTab4)" class="text-right">Recaudo (10M) ⇅</th>
+            <th onclick="toggleSelectSort('t4-sort','cump_desc','cump_asc',renderTab4)" class="text-center">% Cumpl. (10M) ⇅</th>
+          </tr>
+        `;
+        const htmlRows = rows.map(d => {
+          const varColor = d.r_diff >= 0 ? "text-emerald-700 font-bold" : "text-red-700 font-bold";
+          const signDiff = d.r_diff >= 0 ? "+$ " + fmtInt(d.r_diff) : "-$ " + fmtInt(Math.abs(d.r_diff));
+          const signGr = (d.r_growth * 100 >= 0 ? "+" : "") + fmtPct(d.r_growth * 100);
+          return `<tr>
+            <td class="font-sans font-bold text-slate-900 grp-sep">${d.name}</td>
+            <td class="text-right">${fmtCurr(d.p_m1)}</td>
+            <td class="text-right">${fmtCurr(d.p_m10)}</td>
+            <td class="text-center font-bold grp-sep">${(d.p_growth*100 >= 0 ? "+" : "") + fmtPct(d.p_growth*100)}</td>
+            <td class="text-right bg-emerald-50/30">${fmtCurr(d.r_m1)}</td>
+            <td class="text-right bg-emerald-50/30 font-semibold">${fmtCurr(d.r_m10)}</td>
+            <td class="text-right bg-emerald-50/60 ${varColor}">${signDiff}</td>
+            <td class="text-center bg-emerald-50/60 ${varColor} grp-sep">${signGr}</td>
+            <td class="text-right">${fmtCurr(d.p_tot)}</td>
+            <td class="text-right font-bold">${fmtCurr(d.r_tot)}</td>
+            <td class="text-center">${badgeEf(d.cump_tot * 100)}</td>
+          </tr>`;
+        }).join("");
+
+        const pM1 = block.tot_pres_cols[0], pM10 = block.tot_pres_cols[9];
+        const rM1 = block.tot_rec_cols[0], rM10 = block.tot_rec_cols[9];
+        const rDiff = rM10 - rM1;
+        const signTotDiff = rDiff >= 0 ? "+$ " + fmtInt(rDiff) : "-$ " + fmtInt(Math.abs(rDiff));
+        const signTotGr = (rDiff >= 0 ? "+" : "") + fmtPct(rDiff / rM1 * 100);
+        tbody.innerHTML = htmlRows + `
+          <tr class="total-row">
+            <td class="font-sans grp-sep">SUMA TOTAL GENERAL</td>
+            <td class="text-right">${fmtCurr(pM1)}</td>
+            <td class="text-right">${fmtCurr(pM10)}</td>
+            <td class="text-center grp-sep">+${fmtPct((pM10-pM1)/pM1*100)}</td>
+            <td class="text-right">${fmtCurr(rM1)}</td>
+            <td class="text-right">${fmtCurr(rM10)}</td>
+            <td class="text-right">${signTotDiff}</td>
+            <td class="text-center grp-sep">${signTotGr}</td>
+            <td class="text-right">${fmtCurr(block.tot_pres_grand)}</td>
+            <td class="text-right">${fmtCurr(block.tot_rec_grand)}</td>
+            <td class="text-center">${badgeEf(block.tot_rec_grand / block.tot_pres_grand * 100)}</td>
+          </tr>
+        `;
+      } else {
+        const mHdrs = ["01","02","03","04","05","06","07","08","09","10"].map((m, idx) =>
+          `<th onclick="toggleSelectSort('t4-sort','m_${idx}_desc','m_${idx}_asc',renderTab4)" class="text-right">Mes ${m} ⇅</th>`
+        ).join("");
+        const totSortA = view === "PRES_M" ? "ptot_desc" : (view === "REC_M" ? "rtot_desc" : "cump_desc");
+        const totSortB = view === "PRES_M" ? "ptot_asc" : (view === "REC_M" ? "rtot_asc" : "cump_asc");
+        const grSortA = view === "PRES_M" ? "pgrowth_desc" : "rgrowth_desc";
+        const grSortB = view === "PRES_M" ? "pgrowth_asc" : "rgrowth_asc";
+        thead.innerHTML = `
+          <tr class="grp-hdr">
+            <th class="bg-slate-200 text-slate-800 grp-sep">1. CANAL / ZONA</th>
+            <th colspan="10" class="bg-blue-100 text-blue-900 grp-sep">2. DETALLE MENSUAL (MES 01 A MES 10)</th>
+            <th colspan="2" class="bg-amber-100 text-amber-900">3. TOTAL Y CRECIMIENTO</th>
+          </tr>
+          <tr class="col-hdr">
+            <th onclick="toggleSelectSort('t4-sort','az','za',renderTab4)" class="text-left grp-sep">${lblEnt} ⇅</th>
+            ${mHdrs}
+            <th onclick="toggleSelectSort('t4-sort','${totSortA}','${totSortB}',renderTab4)" class="text-right">Total 10M ⇅</th>
+            <th onclick="toggleSelectSort('t4-sort','${grSortA}','${grSortB}',renderTab4)" class="text-center">Var. M01→M10 ⇅</th>
+          </tr>
+        `;
+        const htmlRows = rows.map(d => {
+          let cellsHtml = "";
+          if (view === "REC_M") {
+            cellsHtml = d.r_arr.map((v, i) => `<td class="text-right ${i===9?'grp-sep':''}">${fmtCurr(v)}</td>`).join("")
+              + `<td class="text-right font-bold">${fmtCurr(d.r_tot)}</td>`
+              + `<td class="text-center font-bold">${(d.r_growth*100>=0?"+":"")+fmtPct(d.r_growth*100)}</td>`;
+          } else if (view === "PRES_M") {
+            cellsHtml = d.p_arr.map((v, i) => `<td class="text-right ${i===9?'grp-sep':''}">${fmtCurr(v)}</td>`).join("")
+              + `<td class="text-right font-bold">${fmtCurr(d.p_tot)}</td>`
+              + `<td class="text-center font-bold">${(d.p_growth*100>=0?"+":"")+fmtPct(d.p_growth*100)}</td>`;
+          } else {
+            const c1 = d.p_m1 ? d.r_m1/d.p_m1*100 : 0, c10 = d.p_m10 ? d.r_m10/d.p_m10*100 : 0;
+            cellsHtml = d.p_arr.map((pv, i) => `<td class="text-right ${i===9?'grp-sep':''}">${pv ? fmtPct(d.r_arr[i]/pv*100) : "0,0%"}</td>`).join("")
+              + `<td class="text-right">${badgeEf(d.cump_tot*100)}</td>`
+              + `<td class="text-center font-bold">${((c10-c1)>=0?"+":"")+(c10-c1).toFixed(1).replace(".",",")} pp</td>`;
+          }
+          return `<tr><td class="font-sans font-bold grp-sep">${d.name}</td>${cellsHtml}</tr>`;
+        }).join("");
+        const pM1 = block.tot_pres_cols[0], pM10 = block.tot_pres_cols[9];
+        const rM1 = block.tot_rec_cols[0], rM10 = block.tot_rec_cols[9];
+        let totCells = "";
+        if (view === "REC_M") {
+          totCells = block.tot_rec_cols.map((v, i) => `<td class="text-right ${i===9?'grp-sep':''}">${fmtCurr(v)}</td>`).join("")
+            + `<td class="text-right">${fmtCurr(block.tot_rec_grand)}</td>`
+            + `<td class="text-center">${((rM10-rM1)>=0?"+":"")+fmtPct((rM10-rM1)/rM1*100)}</td>`;
+        } else if (view === "PRES_M") {
+          totCells = block.tot_pres_cols.map((v, i) => `<td class="text-right ${i===9?'grp-sep':''}">${fmtCurr(v)}</td>`).join("")
+            + `<td class="text-right">${fmtCurr(block.tot_pres_grand)}</td>`
+            + `<td class="text-center">+${fmtPct((pM10-pM1)/pM1*100)}</td>`;
+        } else {
+          const cM1 = rM1 / pM1 * 100, cM10 = rM10 / pM10 * 100;
+          totCells = block.tot_pres_cols.map((pv, i) => `<td class="text-right ${i===9?'grp-sep':''}">${fmtPct(block.tot_rec_cols[i]/pv*100)}</td>`).join("")
+            + `<td class="text-right">${badgeEf(block.tot_rec_grand/block.tot_pres_grand*100)}</td>`
+            + `<td class="text-center">${((cM10-cM1)>=0?"+":"")+(cM10-cM1).toFixed(1).replace(".",",")} pp</td>`;
+        }
+        tbody.innerHTML = htmlRows + `<tr class="total-row"><td class="font-sans grp-sep">SUMA TOTAL GENERAL</td>${totCells}</tr>`;
+      }
+
+      const chartItems = rows.slice(0, 17).map(r => {
+        const recM = r.r_tot / 1e6, pptoM = r.p_tot / 1e6, cump = r.cump_tot * 100, varM = r.r_diff / 1e6, rg = r.r_growth * 100;
+        if (view === "REC_M") {
+          const isPos = varM >= 0;
+          return {
+            label: r.name, val: varM, color: isPos ? "#10b981" : "#ef4444", txtColor: isPos ? "#065f46" : "#991b1b",
+            topLabel: (isPos ? "+" : "") + "$" + Math.round(varM).toLocaleString("es-CO") + "M",
+            subTop: (rg >= 0 ? "+" : "") + rg.toFixed(1).replace(".", ",") + "%",
+            subColor: isPos ? "#047857" : "#b91c1c",
+            tip: `<b>${r.name}</b><br/>Recaudo M01: ${fmtCurr(r.r_m1)}<br/>Recaudo M10: ${fmtCurr(r.r_m10)}<br/>Variación: ${isPos ? "+" : ""}${fmtCurr(r.r_diff)} (${rg >= 0 ? "+" : ""}${fmtPct(rg)})`
+          };
+        }
+        if (view === "PRES_M") {
+          return {
+            label: r.name, val: pptoM, color: "#3b82f6", txtColor: "#1e3a8a",
+            topLabel: "$" + Math.round(pptoM).toLocaleString("es-CO") + "M",
+            subTop: (r.p_growth >= 0 ? "+" : "") + (r.p_growth * 100).toFixed(1).replace(".", ",") + "%",
+            subColor: r.p_growth >= 0 ? "#1d4ed8" : "#b91c1c",
+            tip: `<b>${r.name}</b><br/>Presupuesto M01: ${fmtCurr(r.p_m1)}<br/>Presupuesto M10: ${fmtCurr(r.p_m10)}<br/>Acumulado 10M: ${fmtCurr(r.p_tot)}`
+          };
+        }
+        const col = cump >= 95 ? "#10b981" : (cump >= 80 ? "#2563eb" : "#f59e0b");
+        return {
+          label: r.name, val: recM, color: col, txtColor: "#0f172a",
+          topLabel: "$" + Math.round(recM).toLocaleString("es-CO") + "M",
+          subTop: fmtPct(cump) + " cumpl.",
+          subColor: cump >= 95 ? "#047857" : (cump >= 80 ? "#1d4ed8" : "#b45309"),
+          tip: `<b>${r.name}</b><br/>Recaudo 10M: ${fmtCurr(r.r_tot)}<br/>Presupuesto 10M: ${fmtCurr(r.p_tot)}<br/>Cumplimiento: ${fmtPct(cump)}`
+        };
+      });
+      const chartTitle = view === "REC_M"
+        ? "Gráfica Interactiva — Variación de Recaudo M01 → M10 ($ Millones COP y %)"
+        : (view === "PRES_M" ? "Gráfica Interactiva — Presupuesto Acumulado 10M ($ Millones COP)" : "Gráfica Interactiva — Recaudo Acumulado 10M ($ Millones COP y % Cumplimiento)");
+      renderVerticalBarChartSVG("chart-tab4-wrap", chartTitle, "Columnas verticales sincronizadas con el filtro y ordenamiento actual", chartItems);
+    }
+
+    function renderCarteraAnual(overrideSort) {
+      const d = CARTERA_ANUAL_DATA;
+      const t = d.tot;
+      const g23_24_tot = (t.y24 - t.y23) / t.y23 * 100;
+      const g24_25_tot = (t.y25 - t.y24) / t.y24 * 100;
+      document.getElementById("kpis-cartera-anual").innerHTML = `
+        <div class="bg-slate-50 border border-slate-200 rounded-lg p-2.5">
+          <div class="text-[11px] text-slate-600 font-medium">Cartera Consolidada 2023</div>
+          <div class="text-sm md:text-base font-bold font-mono text-slate-800 mt-0.5">${fmtCurr(Math.round(t.y23))}</div>
+          <div class="text-[10.5px] text-slate-500">15 regionales / líneas</div>
+        </div>
+        <div class="bg-slate-50 border border-slate-200 rounded-lg p-2.5 border-l-4 border-l-blue-600">
+          <div class="text-[11px] text-slate-600 font-medium">Cartera Consolidada 2024</div>
+          <div class="text-sm md:text-base font-bold font-mono text-blue-700 mt-0.5">${fmtCurr(Math.round(t.y24))}</div>
+          <div class="text-[10.5px] text-slate-500">+${fmtPct(g23_24_tot)} vs 2023</div>
+        </div>
+        <div class="bg-slate-50 border border-slate-200 rounded-lg p-2.5 border-l-4 border-l-emerald-600">
+          <div class="text-[11px] text-slate-600 font-medium">Cartera Consolidada 2025</div>
+          <div class="text-sm md:text-base font-bold font-mono text-emerald-700 mt-0.5">${fmtCurr(Math.round(t.y25))}</div>
+          <div class="text-[10.5px] text-slate-500">+${fmtPct(g24_25_tot)} vs 2024</div>
+        </div>
+        <div class="bg-slate-50 border border-slate-200 rounded-lg p-2.5 border-l-4 border-l-amber-500">
+          <div class="text-[11px] text-slate-600 font-medium">Crecimiento Acumulado 2023→2025</div>
+          <div class="text-sm md:text-base font-bold font-mono text-amber-700 mt-0.5">+${fmtCurr(Math.round(t.diff))}</div>
+          <div class="text-[10.5px] text-slate-500">+${fmtPct(t.pct)} (15/15 positivas)</div>
+        </div>
+      `;
+
+      const sortMode = overrideSort || document.getElementById("t4e-sort").dataset.customSort || document.getElementById("t4e-sort").value;
+      const rows = sortObjects(d.rows, sortMode);
+      const bodyHtml = rows.map(r => `
+        <tr>
+          <td class="font-sans font-bold grp-sep">${r.name}</td>
+          <td class="text-right">${fmtCurr(Math.round(r.y23))}</td>
+          <td class="text-right text-blue-700">${fmtCurr(Math.round(r.y24))}</td>
+          <td class="text-right font-bold text-emerald-700 grp-sep">${fmtCurr(Math.round(r.y25))}</td>
+          <td class="text-center">${fmtPct(r.g23_24)}</td>
+          <td class="text-center">${fmtPct(r.g24_25)}</td>
+          <td class="text-right font-bold text-emerald-700">+${fmtCurr(Math.round(r.diff))}</td>
+          <td class="text-center font-bold"><span class="px-1.5 py-0.5 rounded text-[10.5px] bg-emerald-500/15 text-emerald-700">+${fmtPct(r.pct)}</span></td>
+        </tr>
+      `).join("");
+      const totHtml = `
+        <tr class="total-row">
+          <td class="font-sans grp-sep">TOTAL CONSOLIDADO (15)</td>
+          <td class="text-right">${fmtCurr(Math.round(t.y23))}</td>
+          <td class="text-right">${fmtCurr(Math.round(t.y24))}</td>
+          <td class="text-right grp-sep">${fmtCurr(Math.round(t.y25))}</td>
+          <td class="text-center">+${fmtPct(g23_24_tot)}</td>
+          <td class="text-center">+${fmtPct(g24_25_tot)}</td>
+          <td class="text-right">+${fmtCurr(Math.round(t.diff))}</td>
+          <td class="text-center">+${fmtPct(t.pct)}</td>
+        </tr>
+      `;
+      document.getElementById("tbody-cartera-anual").innerHTML = bodyHtml + totHtml;
+
+      const chart4eItems = rows.map(r => {
+        const dM = r.diff / 1e6;
+        const col = r.pct >= 100 ? "#f59e0b" : (dM >= 1000 ? "#10b981" : "#2563eb");
+        return {
+          label: r.name, val: dM, color: col, txtColor: r.pct >= 100 ? "#b45309" : "#0f172a",
+          topLabel: "+$" + Math.round(dM).toLocaleString("es-CO") + "M",
+          subTop: "+" + r.pct.toFixed(1).replace(".", ",") + "%",
+          subColor: r.pct >= 100 ? "#b45309" : "#047857",
+          tip: `<b>${r.name}</b><br/>2023: ${fmtCurr(Math.round(r.y23))}<br/>2024: ${fmtCurr(Math.round(r.y24))}<br/>2025: ${fmtCurr(Math.round(r.y25))}<br/>Expansión: +${fmtCurr(Math.round(r.diff))} (+${fmtPct(r.pct)})`
+        };
+      });
+      renderVerticalBarChartSVG(
+        "chart-cartera-wrap",
+        "Gráfica Interactiva — Expansión en $M y % Crecimiento por Regional (2023 vs 2025)",
+        "Columnas verticales sincronizadas con el ordenamiento actual | Verde: >$1.000M | Naranja: Hipercrecimiento %",
+        chart4eItems
+      );
+    }
+
+    function set4fMedio(name) {
+      filter4fMedio = (filter4fMedio === name && name !== "ALL") ? "ALL" : name;
+      renderTendenciaMedios();
+    }
+    function reset4fFilters() {
+      filter4fMedio = "ALL";
+      const sel = document.getElementById("t4f-sort");
+      if (sel) { sel.value = "crec_val_desc"; delete sel.dataset.customSort; }
+      renderTendenciaMedios();
+    }
+
+    function renderLineTrendSVG(containerId, years, series) {
+      const el = document.getElementById(containerId);
+      if (!el) return;
+      const W = 580, H = 310, padL = 62, padR = 28, padT = 40, padB = 44;
+      const plotW = W - padL - padR, plotH = H - padT - padB;
+      const maxV = Math.max(...series.flatMap(s => [s.y23, s.y24, s.y25, s.y26]), 1) * 1.14;
+      const palette = {
+        "COBRADOR": "#2563eb",
+        "OFICINA": "#7c3aed",
+        "MEDIOS ELECTRONICOS": "#10b981",
+        "PUNTO RECAUDO": "#f59e0b"
+      };
+      const xPos = (i) => padL + (i / (years.length - 1)) * plotW;
+      const yPos = (v) => padT + (1 - v / maxV) * plotH;
+
+      const grid = [0, 0.25, 0.5, 0.75, 1].map(f => {
+        const valM = (maxV * (1 - f)) / 1e6;
+        const y = padT + f * plotH;
+        const lbl = valM >= 1000 ? "$" + (valM / 1000).toFixed(1).replace(".", ",") + "MM" : "$" + Math.round(valM) + "M";
+        return `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="#e2e8f0" stroke-dasharray="3,3" />
+                <text x="${padL - 6}" y="${y + 3.5}" text-anchor="end" font-size="9.5" fill="#64748b" font-family="monospace">${lbl}</text>`;
+      }).join("");
+
+      const xLabels = years.map((yr, i) => `
+        <line x1="${xPos(i)}" y1="${padT}" x2="${xPos(i)}" y2="${H - padB}" stroke="#f1f5f9" />
+        <text x="${xPos(i)}" y="${H - padB + 18}" text-anchor="middle" font-size="11" font-weight="700" fill="#1e293b">${yr}</text>
+      `).join("");
+
+      const linesSvg = series.map(s => {
+        const col = palette[s.name] || "#0f172a";
+        const vals = [s.y23, s.y24, s.y25, s.y26];
+        const pts = vals.map((v, i) => `${xPos(i)},${yPos(v)}`).join(" ");
+        const dots = vals.map((v, i) => {
+          const cx = xPos(i), cy = yPos(v);
+          const vMM = (v / 1e9).toFixed(2).replace(".", ",") + "MM";
+          let dy = -9;
+          if (series.length > 1 && s.name === "MEDIOS ELECTRONICOS" && i >= 1) dy = 15;
+          const tip = `<b>${s.name} (${years[i]})</b><br/>Recaudo: ${fmtCurr(Math.round(v))}<br/>Crec. 23→26*: +${fmtPct(s.crec_pct)}`;
+          return `<circle cx="${cx}" cy="${cy}" r="5" fill="${col}" stroke="#ffffff" stroke-width="1.5" class="cursor-pointer" onclick="set4fMedio('${s.name}')" onmouseenter="showBarTip(evt, '${tip.replace(/"/g, '&quot;')}')" onmouseleave="hideBarTip()" />
+                  <text x="${cx}" y="${cy + dy}" text-anchor="middle" font-size="9.5" font-weight="700" fill="${col}">${vMM}</text>`;
+        }).join("");
+        return `<polyline fill="none" stroke="${col}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="${pts}" />${dots}`;
+      }).join("");
+
+      const legend = series.map(s => {
+        const col = palette[s.name] || "#0f172a";
+        return `<button onclick="set4fMedio('${s.name}')" class="inline-flex items-center gap-1 text-[10.5px] font-bold text-slate-700 hover:underline cursor-pointer"><span class="w-2.5 h-2.5 rounded-full inline-block" style="background:${col}"></span>${s.name} (+${fmtPct(s.crec_pct)})</button>`;
+      }).join(" ");
+
+      el.innerHTML = `
+        <div class="bg-white border border-slate-300 rounded-lg p-3">
+          <div class="flex flex-col gap-1 mb-1">
+            <div class="text-xs font-bold text-slate-800">1. Líneas de Tendencia Anual por Medio de Pago (2023 → 2026*)</div>
+            <div class="flex flex-wrap gap-3">${legend}</div>
+          </div>
+          <svg viewBox="0 0 ${W} ${H}" class="w-full h-auto select-none">
+            ${grid}
+            ${xLabels}
+            <line x1="${padL}" y1="${H - padB}" x2="${W - padR}" y2="${H - padB}" stroke="#475569" stroke-width="1.2" />
+            ${linesSvg}
+          </svg>
+        </div>
+      `;
+    }
+
+    function renderTendenciaMedios(overrideSort) {
+      const d = TENDENCIA_4F_DATA;
+      const pillsEl = document.getElementById("t4f-filter-pills");
+      if (pillsEl) {
+        const opts = ["ALL", ...d.series.map(s => s.name)];
+        pillsEl.innerHTML = opts.map(name => {
+          const active = filter4fMedio === name;
+          const lbl = name === "ALL" ? "Todos (4)" : name;
+          const cls = active
+            ? "px-2.5 py-1.5 rounded-md text-xs font-bold bg-blue-600 text-white"
+            : "px-2.5 py-1.5 rounded-md text-xs font-bold bg-slate-100 text-slate-700 border border-slate-300 hover:bg-slate-200";
+          return `<button onclick="set4fMedio('${name}')" class="${cls}">${lbl}</button>`;
+        }).join("");
+      }
+
+      const filteredSeries = filter4fMedio === "ALL" ? d.series : d.series.filter(s => s.name === filter4fMedio);
+      const t = {
+        y23: filteredSeries.reduce((a, r) => a + r.y23, 0),
+        y24: filteredSeries.reduce((a, r) => a + r.y24, 0),
+        y25: filteredSeries.reduce((a, r) => a + r.y25, 0),
+        y26: filteredSeries.reduce((a, r) => a + r.y26, 0),
+        crec_val: filteredSeries.reduce((a, r) => a + r.crec_val, 0),
+      };
+      t.crec_pct = t.y23 ? (t.crec_val / t.y23 * 100) : 0;
+      const g23_24 = t.y23 ? (t.y24 - t.y23) / t.y23 * 100 : 0;
+      const g24_25 = t.y24 ? (t.y25 - t.y24) / t.y24 * 100 : 0;
+
+      document.getElementById("kpis-tendencia-4f").innerHTML = `
+        <div class="bg-slate-50 border border-slate-200 rounded-lg p-2.5">
+          <div class="text-[11px] text-slate-600 font-medium">${filter4fMedio === "ALL" ? "Total Masivos" : filter4fMedio} 2023 → 2025</div>
+          <div class="text-sm md:text-base font-bold font-mono text-slate-800 mt-0.5">${fmtCurr(Math.round(t.y23))} → ${fmtCurr(Math.round(t.y25))}</div>
+          <div class="text-[10.5px] text-slate-500">+${fmtPct(g23_24)} (23→24) | +${fmtPct(g24_25)} (24→25)</div>
+        </div>
+        <div class="bg-slate-50 border border-slate-200 rounded-lg p-2.5 border-l-4 border-l-blue-600">
+          <div class="text-[11px] text-slate-600 font-medium">Acumulado 2026* (Ene–Oct)</div>
+          <div class="text-sm md:text-base font-bold font-mono text-blue-700 mt-0.5">${fmtCurr(Math.round(t.y26))}</div>
+          <div class="text-[10.5px] text-slate-500">+${fmtCurr(Math.round(t.crec_val))} (+${fmtPct(t.crec_pct)}) vs 2023</div>
+        </div>
+        <div class="bg-slate-50 border border-slate-200 rounded-lg p-2.5 border-l-4 border-l-emerald-600">
+          <div class="text-[11px] text-slate-600 font-medium">Líder en Crecimiento: MEDIOS ELECTRONICOS</div>
+          <div class="text-sm md:text-base font-bold font-mono text-emerald-700 mt-0.5">+${fmtCurr(6059803073)} (+67,7%)</div>
+          <div class="text-[10.5px] text-slate-500">Superó todo 2025 en 10 meses de 2026</div>
+        </div>
+        <div class="bg-slate-50 border border-slate-200 rounded-lg p-2.5 border-l-4 border-l-amber-500">
+          <div class="text-[11px] text-slate-600 font-medium">OFICINA, COBRADOR y PUNTO RECAUDO</div>
+          <div class="text-sm md:text-base font-bold font-mono text-amber-700 mt-0.5">OFICINA +37,9% | COBRADOR +18,1%</div>
+          <div class="text-[10.5px] text-slate-500">PUNTO RECAUDO creció +50,2%</div>
+        </div>
+      `;
+
+      const sortMode = overrideSort || document.getElementById("t4f-sort").dataset.customSort || document.getElementById("t4f-sort").value;
+      const rows = sortObjects(filteredSeries, sortMode);
+      renderLineTrendSVG("chart-4f-line-wrap", d.years, filteredSeries);
+
+      const barItems = rows.map(r => {
+        const cM = r.crec_val / 1e6;
+        const col = r.name === "MEDIOS ELECTRONICOS" ? "#10b981" : (r.name === "OFICINA" ? "#7c3aed" : (r.name === "COBRADOR" ? "#2563eb" : "#f59e0b"));
+        return {
+          label: r.name, val: cM, color: col, txtColor: "#0f172a",
+          topLabel: "+$" + Math.round(cM).toLocaleString("es-CO") + "M",
+          subTop: "+" + r.crec_pct.toFixed(1).replace(".", ",") + "%",
+          subColor: "#047857",
+          onClick: `set4fMedio('${r.name}')`,
+          tip: `<b>${r.name}</b> (clic para filtrar)<br/>2023: ${fmtCurr(Math.round(r.y23))}<br/>2026*: ${fmtCurr(Math.round(r.y26))}<br/>Crecimiento: +${fmtCurr(Math.round(r.crec_val))} (+${fmtPct(r.crec_pct)})`
+        };
+      });
+      renderVerticalBarChartSVG(
+        "chart-4f-bar-wrap",
+        "2. Crecimiento por Medio de Pago (2023 vs 2026* — $M y %)",
+        filter4fMedio === "ALL" ? "Haz clic en una barra o botón superior para filtrar" : `Filtrado por: ${filter4fMedio}`,
+        barItems,
+        { halfWidth: true }
+      );
+
+      const bodyHtml = rows.map(r => `
+        <tr>
+          <td class="font-sans font-bold grp-sep">${r.name}</td>
+          <td class="text-right">${fmtCurr(Math.round(r.y23))}</td>
+          <td class="text-right">${fmtCurr(Math.round(r.y24))}</td>
+          <td class="text-right">${fmtCurr(Math.round(r.y25))}</td>
+          <td class="text-right font-bold text-blue-700 grp-sep">${fmtCurr(Math.round(r.y26))}</td>
+          <td class="text-center">+${fmtPct(r.g23_24)}</td>
+          <td class="text-center">+${fmtPct(r.g24_25)}</td>
+          <td class="text-right font-bold text-emerald-700">+${fmtCurr(Math.round(r.crec_val))}</td>
+          <td class="text-center font-bold"><span class="px-1.5 py-0.5 rounded text-[10.5px] bg-emerald-500/15 text-emerald-700">+${fmtPct(r.crec_pct)}</span></td>
+        </tr>
+      `).join("");
+
+      const totHtml = `
+        <tr class="total-row">
+          <td class="font-sans grp-sep">${filter4fMedio === "ALL" ? "TOTAL MASIVOS" : "TOTAL FILTRO (" + filter4fMedio + ")"}</td>
+          <td class="text-right">${fmtCurr(Math.round(t.y23))}</td>
+          <td class="text-right">${fmtCurr(Math.round(t.y24))}</td>
+          <td class="text-right">${fmtCurr(Math.round(t.y25))}</td>
+          <td class="text-right grp-sep">${fmtCurr(Math.round(t.y26))}</td>
+          <td class="text-center">+${fmtPct(g23_24)}</td>
+          <td class="text-center">+${fmtPct(g24_25)}</td>
+          <td class="text-right">+${fmtCurr(Math.round(t.crec_val))}</td>
+          <td class="text-center">+${fmtPct(t.crec_pct)}</td>
+        </tr>
+      `;
+      document.getElementById("tbody-tendencia-4f").innerHTML = bodyHtml + totHtml;
+    }
+
+    renderTab4();
+  </script>
+</body>
+</html>
