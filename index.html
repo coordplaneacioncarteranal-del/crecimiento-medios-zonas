@@ -447,7 +447,7 @@
       `;
 
       document.getElementById("tab4-extra-note").innerHTML = currentSubTab === "med"
-        ? `<strong>Medios Electrónicos (${n_med} Medios):</strong> <strong>Pagos Nequi (+207,4% | 125,7% cumpl.)</strong> y <strong>Davivienda S.a (+379,0% | 196,9% cumpl.)</strong> lideran el crecimiento mensual entre M01 y M10.`
+        ? `<strong>Medios Electrónicos (${block.rows.length} Medios):</strong> <strong>Pagos Nequi (+207,4% | 125,7% cumpl.)</strong> y <strong>Davivienda S.a (+379,0% | 196,9% cumpl.)</strong> lideran el crecimiento mensual entre M01 y M10.`
         : `<strong>Medios por Zona / Regional (17 Zonas):</strong> 16 de las 17 zonas crecieron en recaudo entre M01 y M10. Lideran en crecimiento nominal <strong>Huila (+$26,74M)</strong>, <strong>Tolima (+$24,79M)</strong> y <strong>Quindío (+$21,85M)</strong>; y en cumplimiento <strong>Caldas (95,2%)</strong>, <strong>Valle Norte (91,8%)</strong> y <strong>Valle Centro (90,4%)</strong>.`;
 
       let rows = block.rows.filter(r => !sq || r.name.toLowerCase().includes(sq));
